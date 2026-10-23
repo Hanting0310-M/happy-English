@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Let's Learning English</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: "Comic Sans MS", "Trebuchet MS", "Baloo 2", Arial, sans-serif;
+    color: #5a4a6a;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffd6e8 0%, #fff0d6 40%, #d6f0ff 100%);
+    position: relative;
+  }
+
+  /* ---- floating cute background decorations ---- */
+  .bg-deco { position: fixed; pointer-events: none; z-index: 0; opacity: 0.85; }
+  .cloud-1 { top: 8%; left: 6%; font-size: 54px; animation: floaty 6s ease-in-out infinite; }
+  .cloud-2 { top: 18%; right: 8%; font-size: 44px; animation: floaty 7s ease-in-out infinite 1s; }
+  .star-1  { top: 40%; left: 4%; font-size: 32px; animation: twinkle 2.5s ease-in-out infinite; }
+  .star-2  { top: 60%; right: 5%; font-size: 38px; animation: twinkle 3s ease-in-out infinite 0.6s; }
+  .heart-1 { bottom: 12%; left: 10%; font-size: 34px; animation: floaty 5s ease-in-out infinite 0.5s; }
+  .heart-2 { bottom: 22%; right: 12%; font-size: 30px; animation: floaty 6.5s ease-in-out infinite 1.2s; }
+  .rainbow { top: 5%; right: 25%; font-size: 40px; animation: twinkle 4s ease-in-out infinite; }
+
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-18px) rotate(3deg); }
+  }
+  @keyframes twinkle {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.25); opacity: 1; }
+  }
+
+  .app {
+    width: 100%;
+    max-width: 540px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: popIn 0.45s cubic-bezier(.34,1.56,.64,1); }
+
+  @keyframes popIn {
+    0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  /* ---------- shared card ---------- */
+  .cute-card {
+    background: #fffdfb;
+    border-radius: 36px;
+    padding: 42px 28px;
+    box-shadow: 0 18px 45px rgba(255, 143, 171, 0.25), 0 0 0 6px #fff;
+    border: 6px solid #ffc1d9;
+    position: relative;
+  }
+  .cute-card::before,
+  .cute-card::after {
+    content: "";
+    position: absolute;
+    width: 26px; height: 26px;
+    background: #ffd1e3;
+    border-radius: 50%;
+  }
+  .cute-card::before { top: -14px; left: 24px; }
+  .cute-card::after  { top: -14px; right: 24px; }
+
+  /* ---------- Home ---------- */
+  .home-emoji {
+    font-size: 78px;
+    margin-bottom: 18px;
+    display: inline-block;
+    animation: wiggle 2.2s ease-in-out infinite;
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+  }
+
+  .home-title {
+    font-size: 46px;
+    color: #ff6fa3;
+    margin-bottom: 8px;
+    text-shadow: 3px 3px 0 #ffe0ec, 4px 4px 0 rgba(0,0,0,0.05);
+    line-height: 1.1;
+  }
+  .home-subtitle {
+    font-size: 21px;
+    color: #a794b8;
+    margin-bottom: 32px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 16px 54px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 7px 0 rgba(0,0,0,0.15);
+    letter-spacing: 1px;
+  }
+  .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+  .btn:hover { transform: translateY(-2px); }
+
+  .btn-start {
+    background: linear-gradient(180deg, #ffe066 0%, #ff9ec7 100%);
+    color: #fff;
+    text-shadow: 2px 2px 0 rgba(255,111,163,0.4);
+  }
+  .btn-replay {
+    background: linear-gradient(180deg, #a0e7e5 0%, #b4f8c8 100%);
+    color: #fff;
+    text-shadow: 2px 2px 0 rgba(80,170,150,0.4);
+  }
+
+  /* ---------- Question ---------- */
+  .progress {
+    font-size: 21px;
+    color: #ff9a6c;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  .progress .dot { color: #ffc1d9; }
+
+  .quiz-image {
+    width: 230px;
+    height: 230px;
+    object-fit: cover;
+    border-radius: 30px;
+    border: 7px solid #fff;
+    box-shadow: 0 10px 26px rgba(255, 154, 200, 0.35);
+    margin: 8px 0 22px;
+    transition: transform 0.3s;
+  }
+  .quiz-image.happy { animation: happyBounce 0.6s ease; }
+  @keyframes happyBounce {
+    0%, 100% { transform: scale(1) rotate(0); }
+    25% { transform: scale(1.12) rotate(-6deg); }
+    75% { transform: scale(1.12) rotate(6deg); }
+  }
+
+  .question-prompt {
+    font-size: 23px;
+    color: #b39bc8;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .option {
+    font-family: inherit;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 18px 10px;
+    border: 4px solid #ffe3ef;
+    border-radius: 22px;
+    background: #fff5fa;
+    color: #ff6fa3;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    box-shadow: 0 5px 0 #ffd1e3;
+  }
+  .option:hover:not(.wrong):not(.correct) {
+    background: #ffeaf3;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 #ffc1d9;
+  }
+
+  .option.wrong {
+    background: #fff0f0;
+    border-color: #ff9aa2;
+    color: #d96673;
+    box-shadow: 0 5px 0 #ffd1d6;
+    animation: wiggleShake 0.45s ease;
+  }
+  .option.wrong::after {
+    content: "✗";
+    position: absolute;
+    top: 2px; right: 10px;
+    color: #ff5d6c;
+    font-size: 26px;
+  }
+  @keyframes wiggleShake {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    20% { transform: translateX(-7px) rotate(-3deg); }
+    40% { transform: translateX(7px) rotate(3deg); }
+    60% { transform: translateX(-5px) rotate(-2deg); }
+    80% { transform: translateX(5px) rotate(2deg); }
+  }
+
+  .option.correct {
+    background: #ecfdf0;
+    border-color: #6ee7a8;
+    color: #2bb673;
+    box-shadow: 0 5px 0 #b7f0cf;
+    animation: correctPop 0.5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .option.correct::after {
+    content: "✓";
+    position: absolute;
+    top: 2px; right: 10px;
+    color: #2bb673;
+    font-size: 26px;
+  }
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+    100% { transform: scale(1.05); }
+  }
+
+  /* ---------- floating confetti / emojis ---------- */
+  .confetti-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    bottom: 40%;
+    font-size: 36px;
+    animation: floatUp 1.6s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) scale(0.4) rotate(0deg); opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translateY(-60vh) scale(1.3) rotate(360deg); opacity: 0; }
+  }
+
+  /* ---------- try-again puff ---------- */
+  .puff {
+    position: fixed;
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%);
+    z-index: 60;
+    font-size: 64px;
+    animation: puffIn 0.9s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes puffIn {
+    0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+    30%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    70%  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -60%) scale(0.9); opacity: 0; }
+  }
+
+  /* ---------- Victory ---------- */
+  .victory-emoji {
+    font-size: 92px;
+    margin-bottom: 14px;
+    display: inline-block;
+    animation: wiggle 1.6s ease-in-out infinite;
+  }
+  .victory-title {
+    font-size: 42px;
+    color: #ff8a65;
+    text-shadow: 3px 3px 0 #ffe0b3, 4px 4px 0 rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+  }
+  .victory-msg {
+    font-size: 22px;
+    color: #b39bc8;
+    margin-bottom: 26px;
+  }
+  .stars { font-size: 54px; margin: 14px 0; animation: twinkle 1.5s ease-in-out infinite; }
+
+  /* responsive */
+  @media (max-width: 480px) {
+    .home-title { font-size: 36px; }
+    .quiz-image { width: 180px; height: 180px; }
+    .option { font-size: 21px; padding: 15px 6px; }
+    .btn { font-size: 23px; padding: 14px 42px; }
+    .cute-card { padding: 32px 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- cute background decorations -->
+  <div class="bg-deco cloud-1">☁️</div>
+  <div class="bg-deco cloud-2">☁️</div>
+  <div class="bg-deco star-1">✨</div>
+  <div class="bg-deco star-2">⭐</div>
+  <div class="bg-deco heart-1">💖</div>
+  <div class="bg-deco heart-2">💕</div>
+  <div class="bg-deco rainbow">🌈</div>
+
+  <!-- confetti layer for correct answers -->
+  <div class="confetti-layer" id="confetti-layer"></div>
+
+<div class="app">
+
+  <!-- Home Screen -->
+  <div id="home" class="screen active">
+    <div class="cute-card">
+      <div class="home-emoji">📚🌟</div>
+      <h1 class="home-title">Let's learning English</h1>
+      <p class="home-subtitle">Tap the picture and find the right word!</p>
+      <button class="btn btn-start" onclick="startQuiz()">Start</button>
+    </div>
+  </div>
+
+  <!-- Question Screen -->
+  <div id="question" class="screen">
+    <div class="cute-card">
+      <div class="progress" id="progress"><span class="dot">✿</span> Question 1 / 3 <span class="dot">✿</span></div>
+      <img id="quizImage" class="quiz-image" src="" alt="quiz" />
+      <p class="question-prompt">What is this?</p>
+      <div class="options" id="options"></div>
+    </div>
+  </div>
+
+  <!-- Victory Screen -->
+  <div id="victory" class="screen">
+    <div class="cute-card">
+      <div class="victory-emoji">🎉🏆</div>
+      <h1 class="victory-title">Great Job!</h1>
+      <div class="stars">⭐⭐⭐</div>
+      <p class="victory-msg">You learned all the words. You are a star!</p>
+      <button class="btn btn-replay" onclick="replay()">Play Again</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const questions = [
+    { image: "1.jpg", answer: "apple", options: ["apple", "banana", "pear", "grape"] },
+    { image: "2.jpg", answer: "dog",   options: ["dog", "cat", "mouse", "bird"] },
+    { image: "3.jpg", answer: "eye",   options: ["eye", "hand", "foot", "nose"] }
+  ];
+
+  const correctEmojis = ["🌟", "💖", "⭐", "🎉", "✨", "💫", "🌈", "🎊"];
+  const wrongEmojis   = ["🤔", "😅", "💭", "🌸"];
+
+  let current = 0;
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function startQuiz() {
+    current = 0;
+    renderQuestion();
+    show("question");
+  }
+
+  function renderQuestion() {
+    const q = questions[current];
+    document.getElementById("progress").innerHTML =
+      `<span class="dot">✿</span> Question ${current + 1} / ${questions.length} <span class="dot">✿</span>`;
+    const img = document.getElementById("quizImage");
+    img.src = q.image;
+    img.classList.remove("happy");
+
+    const optionsEl = document.getElementById("options");
+    optionsEl.innerHTML = "";
+
+    shuffle(q.options).forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.textContent = opt;
+      btn.onclick = () => handleAnswer(btn, opt);
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function spawnConfetti() {
+    const layer = document.getElementById("confetti-layer");
+    for (let i = 0; i < 22; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      piece.textContent = correctEmojis[Math.floor(Math.random() * correctEmojis.length)];
+      piece.style.left = Math.random() * 100 + "vw";
+      piece.style.animationDelay = (Math.random() * 0.3) + "s";
+      piece.style.fontSize = (28 + Math.random() * 26) + "px";
+      layer.appendChild(piece);
+      setTimeout(() => piece.remove(), 2000);
+    }
+  }
+
+  function spawnPuff() {
+    const puff = document.createElement("div");
+    puff.className = "puff";
+    puff.textContent = wrongEmojis[Math.floor(Math.random() * wrongEmojis.length)];
+    document.body.appendChild(puff);
+    setTimeout(() => puff.remove(), 950);
+  }
+
+  function handleAnswer(btn, opt) {
+    const q = questions[current];
+    if (opt === q.answer) {
+      btn.classList.add("correct");
+      document.getElementById("quizImage").classList.add("happy");
+      spawnConfetti();
+      document.querySelectorAll(".option").forEach(b => b.onclick = null);
+      setTimeout(() => {
+        current++;
+        if (current < questions.length) {
+          renderQuestion();
+        } else {
+          show("victory");
+          // extra big confetti for victory
+          setTimeout(spawnConfetti, 200);
+          setTimeout(spawnConfetti, 500);
+        }
+      }, 1100);
+    } else {
+      btn.classList.add("wrong");
+      btn.onclick = null;
+      spawnPuff();
+    }
+  }
+
+  function replay() {
+    current = 0;
+    show("home");
+  }
+</script>
+
+</body>
+</html>
